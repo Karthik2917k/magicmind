@@ -44,8 +44,17 @@ export const signin = async (req: Request, res: Response) => {
 
     return res.status(200).json({ ok: true, message: "Login successful" });
   } catch (e) {
+    return res.status(400).json({ ok: false, message: "Signin error: " + e });
+  }
+};
+
+export const logOut = (res: Response) => {
+  try {
+    res.clearCookie("token");
     return res
-      .status(400)
-      .json({ ok: false, message: "Signin error: " + e });
+      .status(200)
+      .json({ ok: true, message: "Logged out successfully" });
+  } catch (e) {
+    return res.status(400).json({ ok: false, message: "Logout error: " + e });
   }
 };
