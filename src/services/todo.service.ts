@@ -1,13 +1,23 @@
 import { Request, Response } from "express";
 import todoModal from "../models/todo.modal";
-
+import jwt from "jsonwebtoken";
 export const createTodo = async (req: Request, res: Response) => {
   try {
     const data = req.body;
+    const { token } = req.cookies;
+    if (!token) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "User not authorized" });
+    }
+    const decoded: any = jwt.decode(token);
     await todoModal.create({
       ...data,
+      user: decoded.userId,
     });
-    return res.status(201).json({ ok: true, data });
+    return res
+      .status(201)
+      .json({ ok: true, message: "Todo created successfully" });
   } catch (e) {
     return res
       .status(400)
@@ -49,7 +59,7 @@ export const updateTodo = async (req: Request, res: Response) => {
     if (!todo) {
       return res.status(404).json({ ok: false, message: "Todo not found" });
     }
-    return res.status(200).json({ ok: true, message:"Updated Todo" });
+    return res.status(200).json({ ok: true, message: "Updated Todo" });
   } catch (error) {
     return res
       .status(500)
