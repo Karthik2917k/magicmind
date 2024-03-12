@@ -38,7 +38,7 @@ export const signin = async (req: Request, res: Response) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: false,
+      httpOnly: true,
       maxAge: 3600000,
     });
 
@@ -56,5 +56,24 @@ export const logOut = (res: Response) => {
       .json({ ok: true, message: "Logged out successfully" });
   } catch (e) {
     return res.status(400).json({ ok: false, message: "Logout error: " + e });
+  }
+};
+
+export const validUser = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "User not authorized" });
+    }
+    const decoded: any = jwt.decode(token);
+    const user = await userModal.findById({ _id: decoded.userId });
+    if (!user) {
+      return res.status(400).json({ ok: false, message: "User not found" });
+    }
+    return res.status(200).json({ ok: true, message: "User valid" });
+  } catch (e) {
+    return res.status(400).json({ ok: false, message: "Error:" + e });
   }
 };
